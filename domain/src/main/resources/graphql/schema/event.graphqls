@@ -1,0 +1,14 @@
+scalar DateTime
+
+type Event {
+    id: ID!
+    venue: [Venue!]
+    name: String!
+    startTime: DateTime!
+    endTime: DateTime!
+}
+
+input EventFilterInput {
+    fromStartTime: DateTime
+    toEndTime: DateTime
+}

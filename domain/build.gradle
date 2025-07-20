@@ -2,10 +2,15 @@ apply from: "${rootProject.rootDir}/gradle/graphql.gradle"
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation "com.graphql-java:graphql-java-extended-scalars:${graphqlJavaExtendedScalarsVersion}"
 }
 
 generateJava {
     schemaPaths = ["${projectDir}/src/main/resources/graphql"]
     packageName = 'ru.mts.media.platform.umc.domain.gql'
     generateClient = false
+
+    typeMapping = [
+            "DateTime": "java.time.LocalDateTime"
+    ]
 }

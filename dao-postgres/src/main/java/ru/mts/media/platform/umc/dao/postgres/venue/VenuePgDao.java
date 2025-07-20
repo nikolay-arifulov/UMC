@@ -1,9 +1,11 @@
 package ru.mts.media.platform.umc.dao.postgres.venue;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import ru.mts.media.platform.umc.domain.gql.types.FullExternalId;
+import ru.mts.media.platform.umc.domain.gql.types.EventFilterInput;
+import ru.mts.media.platform.umc.domain.gql.types.FullExternalIdInput;
 import ru.mts.media.platform.umc.domain.gql.types.Venue;
 import ru.mts.media.platform.umc.domain.venue.VenueSave;
 import ru.mts.media.platform.umc.domain.venue.VenueSot;
@@ -23,17 +25,39 @@ class VenuePgDao implements VenueSot {
     }
 
     @Override
-    public Optional<Venue> getVenueById(FullExternalId externalId) {
-        Optional.of(externalId)
-                .map(mapper::asPk)
-                .flatMap(repository::findById);
-        return Optional.empty();
+    public Optional<Venue> getVenueById(FullExternalIdInput externalId) {
+        return Optional.of(externalId)
+            .map(mapper::asPk)
+            .flatMap(repository::findById)
+            .map(mapper::asModel);
+    }
+
+    @Override
+    public List<Venue> getVenuesWithEventsFiltered(EventFilterInput filter) {
+        if (filter != null && filter.getFromStartTime() != null && filter.getToEndTime() != null) {
+            return repository.findAllWithEventsFiltered(filter.getFromStartTime(), filter.getToEndTime())
+                .stream()
+                .map(mapper::asModel)
+                .toList();
+        } else {
+            return repository.findAllWithEvents()
+                .stream()
+                .map(mapper::asModel)
+                .toList();
+        }
+    }
+
+    @Override
+    public List<Venue> getVenuesByEventId(Long eventId) {
+        return repository.findAllByEventId(eventId).stream()
+            .map(mapper::asModel)
+            .toList();
     }
 
     @EventListener
     public void handleVenueCreatedEvent(VenueSave evt) {
         evt.unwrap()
-                .map(mapper::asEntity)
-                .ifPresent(repository::save);
+            .map(mapper::asEntity)
+            .ifPresent(repository::save);
     }
 }

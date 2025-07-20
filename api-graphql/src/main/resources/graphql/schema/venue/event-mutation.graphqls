@@ -1,0 +1,8 @@
+extend type Mutation {
+    createEvent(
+        venueReferenceId: String!
+        name: String!
+        startTime: DateTime!
+        endTime: DateTime!
+    ): Event!
+}
